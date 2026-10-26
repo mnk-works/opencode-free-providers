@@ -5,7 +5,7 @@
 OpenCode v2.1.4 ships a provider list built from [models.dev](https://models.dev). This repo snapshots that list, checks every provider for free API access (free tier, free model variants, recurring credits or trial credits), and records what is free **out of the box** - i.e. without an API key or a credit card.
 
 - **237 providers / integrations** exist in the OpenCode provider picker.
-- **12** of them already had models enabled in this OpenCode install (the rest need `/connect` first).
+- **12** of them already had models enabled by default (the rest need `/connect` first).
 - **46 `$0` models** were enabled with zero setup, from 9 providers.
 - Only a handful of providers are **genuinely free in a way you can rely on for coding**: OpenCode's own free models, Google AI Studio (Flash tiers), OpenRouter `:free`, UnoRouter `:free`, Kilo Auto Free, NVIDIA's trial endpoints, plus a few Chinese-platform signup quotas.
 
@@ -36,7 +36,7 @@ Everything else is pay-as-you-go, a paid subscription (OpenCode Go, MiniMax Toke
 1. Started a private OpenCode server in tmux: `opencode serve --hostname 127.0.0.1 --port 4097` (it prints a password; v2 requires basic auth `opencode:<password>`).
 2. Pulled the real provider list from the API:
    - `GET /api/integration` → 237 integrations, their auth methods (`key` / `env` / `oauth` / `external` / cloud command) and env var names.
-   - `GET /api/model` → 1,262 model entries enabled in this install, with `cost` per model.
+   - `GET /api/model` → 1,262 model entries enabled by default, with `cost` per model.
 3. Cross-referenced every provider ID with `https://models.dev/api.json` (the catalog OpenCode builds on) for catalog endpoint, runtime package and `$0` models.
 4. Probed every provider's homepage (HTTP status + "free tier / free plan / free trial / no credit card / 免费" phrases) to catch marketing claims, then read the pricing/docs page for anything that looked promising.
 5. Recorded each provider in `data/providers.csv` with an **evidence status**:
@@ -47,16 +47,16 @@ Everything else is pay-as-you-go, a paid subscription (OpenCode Go, MiniMax Toke
 Convenience files:
 
 - `data/providers.csv` - all 237 providers (endpoint, auth, model counts, free status, how to get free, limits, evidence URL).
-- `data/enabled-free-models.csv` - the `$0` models enabled in this OpenCode install.
+- `data/enabled-free-models.csv` - the `$0` models enabled by default in the default OpenCode setup.
 - The free-model list per provider also lives in the tables below.
 
 To refresh: re-run steps 1-2 (see [Reproduce](#reproduce)), re-fetch `models.dev/api.json`, and update the vendor rows that changed.
 
 ---
 
-## Providers enabled by default in this install
+## Providers enabled by default in OpenCode
 
-These are the providers that already had models in `/models` without running `/connect`. All but `gate` come from models.dev.
+These are the providers that already had models in `/models` without running `/connect`. All but `gate` come from models.dev; `gate` was added manually in the OpenCode config.
 
 | Provider | API style / auth | Models | `$0` models | Free? | Notes |
 | :-- | :-- | --: | --: | :--: | :-- |
@@ -65,13 +65,13 @@ These are the providers that already had models in `/models` without running `/c
 | **OpenRouter** (`openrouter`) | OpenRouter native, key | 371 | 21 | **yes** | `:free` variants, 50 req/day (1,000 after $10 top-up) |
 | **Hugging Face** (`huggingface`) | OpenAI-compatible, key | 81 | 1 | partial | `zai-org/GLM-4.7-Flash` is $0; PRO gives $2/mo credits |
 | **SiliconFlow** (`siliconflow`) | OpenAI-compatible, key | 54 | 0 | partial | `$1` signup credit (intl) |
-| **Charm Hyper** (`hyper`) | OpenAI-compatible, key | 23 | 0 | no | PAYG from $5, or $10-$200/mo weekly-credit plans |
+| **Charm Hyper** (`hyper`) | OpenAI-compatible, key | 23 | 0 | partial | Free trial was a monthly Hypercredit allowance (retired); now PAYG from $5 or $10-$200/mo weekly-credit plans |
 | **Mistral** (`mistral`) | Mistral native, key | 19 | 0 | partial | Free chat plan ≠ free API; "Experiment" tier rate-limited |
 | **NanoGPT** (`nano-gpt`) | OpenAI-compatible, key | 641 | 4 | partial | PAYG only; `$0` helper routes are not a free plan |
 | **DeepSeek** (`deepseek`) | OpenAI-compatible, key | 2 | 0 | no | Off-peak 50% discount only |
 | **MiniMax** (`minimax`) | Anthropic-compatible, key | 2 | 0 | no | M3 has a permanent 50% discount |
 | **Xiaomi** (`xiaomi`) | OpenAI-compatible, key | 3 | 0 | partial | Welcome bonus credits |
-| **Constellation Gate** (`gate`) | Custom OpenAI-compatible | 2 | 2 | partial | Custom provider in this machine's config only; marketing says "free tier, no card" |
+| **Constellation Gate** (`gate`) | Custom OpenAI-compatible | 2 | 2 | partial | User-configured provider, not in models.dev; marketing says "free tier, no card" |
 
 ### The 9 free models in OpenCode (`opencode/*`)
 
@@ -123,6 +123,7 @@ These are the providers where the vendor itself documents a free path. Descripti
 | **Baseten** | $30 trial credit |
 | **Vultr** | $250 / 30-day promo credit |
 | **Hugging Face** | PRO: $2/month inference credits (free users: none) |
+| **Charm Hyper** | Free monthly Hypercredit allowance was retired; PAYG prepaid credits from $5 |
 | **SiliconFlow (intl)** | $1 signup credit |
 | **Xiaomi MiMo** | Welcome bonus credits |
 | **Jiekou.AI, OrcaRouter, Meganova, AIHubMix** | Small credits / free-listed routes, not documented |
@@ -188,7 +189,7 @@ These are the providers where the vendor itself documents a free path. Descripti
 | **Bothub** (`bothub`) | key/env | 8 | 2 free | partial | Some $0 routes (nemotron-3-ultra-550b-a55b:free, gemma-4-31b-it:free). |
 | **Boundless** (`boundless`) | key/env | 20 | — | not checked | No public free tier found on the provider's homepage and no $0 chat models in models.dev |
 | **Cerebras** (`cerebras`) | key/env | 2 | — | partial | Free tier with daily token caps on a few fast models. |
-| **Charm Hyper** (`hyper`) | key/env | 23 | — | no | No free tier |
+| **Charm Hyper** (`hyper`) | key/env | 23 | — | partial | Formerly a free Hypercredit allowance per month (generous, no card); now retired - PAYG from $5, ZDR, no rate limits |
 | **Chutes** (`chutes`) | key/env | 17 | 7 free | partial | Decentralised compute with a rotating free-ish set; 7 catalog entries at $0 (DeepSeek V4.1/V4 Pro, Qwen3.8, GLM-5.2). |
 | **Clarifai** (`clarifai`) | key/env | 12 | — | not checked | No public free tier found on the provider's homepage and no $0 chat models in models.dev |
 | **Claudinio** (`claudinio`) | key/env | 2 | — | no | Subscription plan with monthly/weekly quotas - not a free tier |
@@ -451,7 +452,7 @@ curl -s https://models.dev/api.json | python3 -c "import json,sys; d=json.load(s
 - **`$0` in a catalog is not the same as free to use.** models.dev lists `$0` for beta models, media models that bill per image, TTS/ASR endpoints, promo models and safety models. `data/providers.csv` keeps the raw `$0` counts separate from the verified `free` verdict so you can see the difference.
 - **Free tiers are usually for evaluation.** Expect lower rate limits (RPM/TPM/RPD), data being used for training on some free tiers (Google free tier, NVIDIA trial, many `:free` routes), and no SLA.
 - **Region matters.** Alibaba free quotas, SiliconFlow CN, Xiaomi Token Plan regions, Beam Free's blocklist, and OpenAI/Gemini available regions all differ.
-- **`gate`** (Constellation Gate) is a custom provider defined in one machine's `~/.config/opencode/opencode.json`, not part of models.dev; its "free tier" is a marketing claim.
+- **`gate`** (Constellation Gate) is a custom provider configured manually in OpenCode's config (not part of models.dev); its "free tier" is a marketing claim.
 - **Auth is not the same as free.** Several providers (Copilot, OpenAI via ChatGPT plan, GitLab Duo, Poe) can be used without a *paid API bill* because a subscription you already have covers them.
 
 ## Contributing
